@@ -508,6 +508,11 @@ export default function Home() {
               <br />
               World&apos;s First Truly Immersive Hackathon
             </p>
+            {/* <p>
+              Project: Chronos
+              <br />
+              World&apos;s First Truly Immersive Hackathon
+            </p> */}
           </div>
 
           <div className="footer-contact">
