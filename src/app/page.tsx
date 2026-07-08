@@ -111,21 +111,22 @@ function getSriLankaDateKey(now: number) {
 }
 
 function getActiveTimelineIndex(now: number) {
-  const today = getSriLankaDateKey(now);
-  const eventTodayIndex = timeline.findIndex(
-    (event) => event.dateKey === today,
-  );
-
-  if (eventTodayIndex >= 0) return eventTodayIndex;
-
+  // Time-range check takes priority so transitions happen at the right hour
   const activeIndex = timeline.findIndex(
     (event) =>
       now >= new Date(event.activeFrom).getTime() &&
       now < new Date(event.activeUntil).getTime(),
   );
-
   if (activeIndex >= 0) return activeIndex;
 
+  // Fall back to date-only match (highlights today's event outside its window)
+  const today = getSriLankaDateKey(now);
+  const eventTodayIndex = timeline.findIndex(
+    (event) => event.dateKey === today,
+  );
+  if (eventTodayIndex >= 0) return eventTodayIndex;
+
+  // Otherwise highlight the next upcoming event
   return timeline.findIndex(
     (event) => now < new Date(event.activeFrom).getTime(),
   );
