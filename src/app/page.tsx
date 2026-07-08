@@ -33,6 +33,7 @@ const timeline = [
     dateKey: "2026-07-02",
     activeFrom: "2026-07-02T00:00:00+05:30",
     activeUntil: "2026-07-06T20:00:00+05:30",
+    status: "Assembling Crew",
   },
   {
     title: "Awareness Session & Demo Trial",
@@ -41,6 +42,7 @@ const timeline = [
     dateKey: "2026-07-06",
     activeFrom: "2026-07-06T20:00:00+05:30",
     activeUntil: "2026-07-06T21:00:00+05:30",
+    status: "Pre-Mission Briefing",
   },
   {
     title: "Registrations Close",
@@ -49,6 +51,7 @@ const timeline = [
     dateKey: "2026-07-07",
     activeFrom: "2026-07-06T21:00:00+05:30",
     activeUntil: "2026-07-07T23:00:00+05:30",
+    status: "Boarding Window Closing",
   },
   {
     title: "Round 1 — The Trials",
@@ -58,6 +61,7 @@ const timeline = [
     dateKey: "2026-07-08",
     activeFrom: "2026-07-07T23:00:00+05:30",
     activeUntil: "2026-07-08T22:30:00+05:30",
+    status: "The Trials: Tonight",
   },
   {
     title: "Finalist Announcement",
@@ -66,6 +70,7 @@ const timeline = [
     dateKey: "2026-07-09",
     activeFrom: "2026-07-08T22:30:00+05:30",
     activeUntil: "2026-07-10T00:00:00+05:30",
+    status: "Survivors Identified",
   },
   {
     title: "Final Round",
@@ -74,6 +79,7 @@ const timeline = [
     dateKey: "2026-07-12",
     activeFrom: "2026-07-10T00:00:00+05:30",
     activeUntil: "2026-07-12T15:00:00+05:30",
+    status: "Operation Chronos: Live",
   },
 ];
 
@@ -531,7 +537,12 @@ export default function Home() {
         <div className="site-container footer-bottom">
           <span>© 2026 Software Engineering Student Community of SLIIT</span>
           <span>
-            Status: <strong>Recruiting</strong>
+            Status:{" "}
+            <strong>
+              {activeTimelineIndex >= 0
+                ? timeline[activeTimelineIndex].status
+                : "Signal Recovered"}
+            </strong>
           </span>
         </div>
       </footer>
