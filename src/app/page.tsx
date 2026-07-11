@@ -83,6 +83,10 @@ const timeline = [
   },
 ];
 
+const FINAL_ROUND_START = "2026-07-12T09:00:00+05:30";
+const FINAL_ROUND_END = "2026-07-12T15:00:00+05:30";
+const FINAL_ROUND_VENUE = "SLIIT Malabe Campus";
+
 const storyPanels = [
   {
     title: "The Chronos Experiment",
@@ -136,6 +140,51 @@ function getActiveTimelineIndex(now: number) {
   return timeline.findIndex(
     (event) => now < new Date(event.activeFrom).getTime(),
   );
+}
+
+type FinalRoundPhase = "upcoming" | "live" | "ended";
+
+interface FinalRoundStatus {
+  phase: FinalRoundPhase;
+  days: number;
+  hours: number;
+  minutes: number;
+  seconds: number;
+}
+
+function getFinalRoundStatus(now: number): FinalRoundStatus {
+  const start = new Date(FINAL_ROUND_START).getTime();
+  const end = new Date(FINAL_ROUND_END).getTime();
+
+  if (now >= end) {
+    return { phase: "ended", days: 0, hours: 0, minutes: 0, seconds: 0 };
+  }
+
+  if (now >= start) {
+    return { phase: "live", days: 0, hours: 0, minutes: 0, seconds: 0 };
+  }
+
+  const diff = start - now;
+  const days = Math.floor(diff / 86_400_000);
+  const hours = Math.floor((diff % 86_400_000) / 3_600_000);
+  const minutes = Math.floor((diff % 3_600_000) / 60_000);
+  const seconds = Math.floor((diff % 60_000) / 1_000);
+
+  return { phase: "upcoming", days, hours, minutes, seconds };
+}
+
+function useFinalRoundStatus() {
+  const [status, setStatus] = useState(() => getFinalRoundStatus(Date.now()));
+
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      setStatus(getFinalRoundStatus(Date.now()));
+    }, 1_000);
+
+    return () => window.clearInterval(timer);
+  }, []);
+
+  return status;
 }
 
 function ParticleCanvas() {
@@ -211,6 +260,7 @@ export default function Home() {
   const [activeTimelineIndex, setActiveTimelineIndex] = useState(() =>
     getActiveTimelineIndex(Date.now()),
   );
+  const finalRoundStatus = useFinalRoundStatus();
 
   useEffect(() => {
     const timer = window.setInterval(() => {
@@ -222,6 +272,13 @@ export default function Home() {
 
   const closeMobileMenu = () => setMobileMenuOpen(false);
 
+  const finalRoundBarText =
+    finalRoundStatus.phase === "live"
+      ? "Final Round is LIVE now"
+      : finalRoundStatus.phase === "ended"
+        ? "Final Round complete — Mission Chronos accomplished"
+        : `Final Round starts in ${String(finalRoundStatus.days).padStart(2, "0")}d ${String(finalRoundStatus.hours).padStart(2, "0")}h ${String(finalRoundStatus.minutes).padStart(2, "0")}m ${String(finalRoundStatus.seconds).padStart(2, "0")}s`;
+
   return (
     <>
       <div className="bg-atmosphere" />
@@ -230,6 +287,12 @@ export default function Home() {
       <div className="bg-scanlines" />
 
       <header className="site-header">
+        <a
+          className={`final-status-bar final-status-bar-${finalRoundStatus.phase}`}
+          href="#final">
+          <span className="final-status-dot" aria-hidden="true" />
+          {finalRoundBarText}
+        </a>
         <div className="site-container navbar">
           <a className="navbar-brand" href="#home" onClick={closeMobileMenu}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -260,6 +323,9 @@ export default function Home() {
             </a>
             <a href="#when" onClick={closeMobileMenu}>
               When
+            </a>
+            <a href="#final" onClick={closeMobileMenu}>
+              Final
             </a>
             <a href="#booklet" onClick={closeMobileMenu}>
               Booklet
@@ -401,6 +467,57 @@ export default function Home() {
           </div>
         </section>
 
+        <section className="content-section final-round-section" id="final">
+          <div className="site-container">
+            <SectionHeading title="Final Round" />
+            <p className="final-round-intro">
+              Operation Chronos reaches its climax at {FINAL_ROUND_VENUE}.
+              Qualified crews report on-site for the on-premises final.
+            </p>
+
+            {finalRoundStatus.phase === "upcoming" && (
+              <div className="countdown-grid" role="timer" aria-live="polite">
+                <div className="countdown-box">
+                  <strong>{String(finalRoundStatus.days).padStart(2, "0")}</strong>
+                  <span>Days</span>
+                </div>
+                <div className="countdown-box">
+                  <strong>
+                    {String(finalRoundStatus.hours).padStart(2, "0")}
+                  </strong>
+                  <span>Hours</span>
+                </div>
+                <div className="countdown-box">
+                  <strong>
+                    {String(finalRoundStatus.minutes).padStart(2, "0")}
+                  </strong>
+                  <span>Minutes</span>
+                </div>
+                <div className="countdown-box">
+                  <strong>
+                    {String(finalRoundStatus.seconds).padStart(2, "0")}
+                  </strong>
+                  <span>Seconds</span>
+                </div>
+              </div>
+            )}
+
+            {finalRoundStatus.phase === "live" && (
+              <div className="final-live-banner" role="status" aria-live="polite">
+                <span className="final-status-dot" aria-hidden="true" />
+                Final Round is LIVE now — 12 July, 9:00 AM–3:00 PM
+              </div>
+            )}
+
+            {finalRoundStatus.phase === "ended" && (
+              <div className="final-ended-banner" role="status">
+                Final Round has concluded. Thank you for joining Operation
+                Chronos.
+              </div>
+            )}
+          </div>
+        </section>
+
         <section className="booklet-section" id="booklet">
           <div className="site-container booklet-hero-inner">
             <p className="booklet-label">Official event resource</p>
@@ -458,37 +575,6 @@ export default function Home() {
                   <p>Second Runner-Up</p>
                   <strong>TBA</strong>
                 </article>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section className="content-section partners-section">
-          <div className="site-container">
-            <div className="partners-grid">
-              <div>
-                <SectionHeading title="Our Partners" />
-                <div className="prose">
-                  <p>Partner announcements coming soon.</p>
-                  <p>
-                    We are currently open to collaborations with organizations,
-                    companies, and communities interested in supporting student
-                    innovation and immersive tech experiences.
-                  </p>
-                  <p className="prose-highlight">
-                    Interested in partnering with Codejam?
-                    <br />
-                    Get in touch with us.
-                  </p>
-                </div>
-              </div>
-              <div
-                className="partner-placeholders"
-                aria-label="Partner logo placeholders">
-                <div className="image-frame" />
-                <div className="image-frame" />
-                <div className="image-frame" />
-                <div className="image-frame" />
               </div>
             </div>
           </div>
