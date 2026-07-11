@@ -324,9 +324,6 @@ export default function Home() {
             <a href="#when" onClick={closeMobileMenu}>
               When
             </a>
-            <a href="#final" onClick={closeMobileMenu}>
-              Final
-            </a>
             <a href="#booklet" onClick={closeMobileMenu}>
               Booklet
             </a>
